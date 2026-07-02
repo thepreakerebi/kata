@@ -1,0 +1,40 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# env & secrets — never commit real credentials
+.env
+.env.*
+!.env.example
+
+# Baileys auth state (WhatsApp session credentials — sensitive)
+auth-state/
+*.creds.json
+baileys_store*
+
+# builds
+.next/
+out/
+dist/
+build/
+
+# runtime
+*.log
+logs/
+.DS_Store
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# test/coverage
+coverage/
+
+# editor
+.vscode/
+.idea/
+
+# local scratch
+tmp/
+scratch/
