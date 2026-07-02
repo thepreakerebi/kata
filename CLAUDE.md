@@ -51,6 +51,10 @@ memory system.
   wrapper is needed, pick the semantically correct element — there is always
   one.
 - Components come from **shadcn/ui** — do not hand-roll what shadcn provides.
+  This project's shadcn generation is built on **Base UI, not Radix**: compose
+  with the `render` prop (e.g. `<Button render={<Link href="…" />}>label</Button>`),
+  not `asChild`. Next.js here is **v16** — check `node_modules/next/dist/docs/`
+  before using APIs that may have changed.
 - Loading states use shadcn **Skeleton** — never "Loading…" text or bare
   spinners.
 - Page-level empty states use a shared **EmptyState** component (3D
