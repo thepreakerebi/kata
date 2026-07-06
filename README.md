@@ -14,8 +14,7 @@ chat stream, and answers instantly across sessions: *"who owes me money?"*,
 *"what did Mama Chidinma order last time?"*, *"what did the rice supplier quote
 in May?"*
 
-Built for the [Global AI Hackathon Series with Qwen Cloud](https://qwencloud-hackathon.devpost.com/)
-— **Track 1: MemoryAgent**.
+Built for the [CockroachDB × AWS Hackathon — Build with Agentic Memory](https://cockroachdb-ai.devpost.com/).
 
 ## Why not just RAG? (the memory thesis)
 
@@ -37,22 +36,30 @@ back to its source message.
 
 ```
 WhatsApp (Baileys) ─┐
-                    ├─→ ingest → Qwen extraction → confidence gate → memory store
-Dashboard simulator ┘                                    │
-                                                         ▼
-                                        episodic · semantic · procedural · ledger
-                                            (Postgres + pgvector, entity graph)
-                                                         │
+                    ├─→ ingest → Bedrock extraction → confidence gate → memory store
+Dashboard simulator ┘                                      │
+                                                           ▼
+                                          episodic · semantic · procedural · ledger
+                                     (CockroachDB: entity graph + VECTOR embeddings
+                                            with distributed vector indexing)
+                                                           │
 merchant query → classifier → hybrid recall (graph + vector) → token-budgeted
-packer (visible trace) → Qwen answer
+packer (visible trace) → Bedrock answer
 ```
 
-- `apps/api` — Bun + Hono: memory engine, Qwen pipeline, Baileys adapter,
-  benchmark harness. Long-lived process on **Alibaba Cloud ECS**.
+- **Memory layer: CockroachDB Cloud.** All four memory classes, the entity
+  graph, and the embeddings live in one database — ledger facts and their
+  vectors stay transactionally consistent. Semantic recall uses CockroachDB's
+  **distributed vector indexing**; the agent's read-only memory introspection
+  goes through the **CockroachDB Managed MCP Server**.
+- `apps/api` — Bun + Hono: memory engine, Bedrock pipeline, Baileys adapter,
+  benchmark harness. Long-lived process on **Amazon ECS (Fargate)** — Baileys
+  holds a persistent socket, so no Lambda.
 - `apps/web` — Next.js dashboard: memory brain, recall traces, confirmation
   queue, simulator.
-- Models: Qwen (chat + extraction + embeddings + Qwen-VL notebook OCR) via
-  Qwen Cloud's OpenAI-compatible endpoint.
+- Models via **Amazon Bedrock**: chat + extraction + paper-notebook photo OCR
+  (multimodal), Titan Text Embeddings v2 for vectors. WhatsApp media lands in
+  **Amazon S3**.
 
 *(Architecture diagram, benchmark results, demo video, and deployment proof
 land here as they are built.)*
@@ -61,7 +68,7 @@ land here as they are built.)*
 
 ```bash
 bun install
-cp .env.example .env   # fill in DASHSCOPE_API_KEY and DATABASE_URL
+cp .env.example .env   # fill in AWS credentials and the CockroachDB DATABASE_URL
 bun run dev:api        # Hono API on :8787
 bun run dev:web        # dashboard on :3000
 ```

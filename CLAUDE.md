@@ -2,9 +2,10 @@
 
 Kata is a memory engine for businesses that run entirely on WhatsApp (informal
 merchants: customers, orders, informal credit/debts, supplier quotes). Entry for
-the Global AI Hackathon Series with Qwen Cloud — **Track 1: MemoryAgent**.
-Deadline: **July 9, 2026, 11pm GMT+2**. The project must remain deployed and
-testable through **July 31, 2026** (judging period).
+the **CockroachDB × AWS Hackathon — "Build with Agentic Memory"**
+(cockroachdb-ai.devpost.com). Deadline: **August 18, 2026, 5pm ET**. The demo
+app must remain deployed and functional through the judging period ending
+**September 15, 2026**.
 
 **Framing rule:** Kata is "a memory engine with domain-aware forgetting and
 confidence-gated writes, demonstrated on the informal economy" — never "a
@@ -13,17 +14,34 @@ memory system.
 
 ## Architecture
 
-- `apps/api` — Bun + Hono. Memory engine, Qwen pipeline, Baileys WhatsApp
+- `apps/api` — Bun + Hono. Memory engine, Bedrock pipeline, Baileys WhatsApp
   adapter, benchmark harness. Runs as a **long-lived process** (Baileys holds a
-  persistent socket) on an Alibaba Cloud ECS instance. Never serverless.
+  persistent socket) on **Amazon ECS (Fargate)**. Never Lambda — the socket
+  must stay up.
 - `apps/web` — Next.js + Tailwind + shadcn/ui + motion. Dashboard: memory brain
   visualization, recall traces, confirmation queue, and the **simulator pane**
   (a chat input that feeds the exact same ingest pipeline as WhatsApp — dev
-  console and judge-access fallback; some judges cannot open WhatsApp).
-- Postgres + pgvector stores all memory classes and embeddings.
-- Qwen models only, via the OpenAI-compatible endpoint
-  `https://dashscope-intl.aliyuncs.com/compatible-mode/v1` (chat, extraction,
-  embeddings, Qwen-VL for paper-notebook OCR import).
+  console and judge-access fallback; judges must be able to test without
+  WhatsApp).
+- **CockroachDB Cloud is the single memory store** — all four memory classes,
+  the entity graph, AND embeddings via CockroachDB's `VECTOR` type with
+  **distributed vector indexing**. No separate vector store; the pitch is
+  transactional consistency between ledger facts and their embeddings.
+- Models via **Amazon Bedrock**: chat + extraction + paper-notebook photo OCR
+  (multimodal Claude), embeddings (Titan Text Embeddings v2). Model IDs come
+  from env, never hard-coded.
+
+### Required hackathon integrations (must be meaningful, not just initialized)
+
+- **CockroachDB tools (need ≥2):**
+  1. **Distributed Vector Indexing** — semantic recall over memory embeddings.
+  2. **Managed MCP Server** (`https://cockroachlabs.cloud/mcp`) — the agent's
+     read-only memory-introspection path (analytics questions about its own
+     memory) and the Claude Code dev workflow; document both.
+  3. **Agent Skills Repo** (open source) — use during schema/perf work and
+     document as the optional tools-feedback item.
+- **AWS services (need ≥1):** Amazon Bedrock (models), Amazon ECS (agent
+  runtime), Amazon S3 (WhatsApp media + notebook photos).
 
 ## Memory engine design (locked)
 
@@ -101,9 +119,18 @@ Payments, outbound reminders/campaigns, multi-merchant onboarding, agent
 autonomy (agent messaging customers on the merchant's behalf), SMS/USSD, mobile
 app.
 
+## Judging criteria (build toward these)
+
+Agentic Memory Design (CockroachDB in a production-grade memory role, beyond
+toy queries) · Technical Implementation (correct, safe use of vector index +
+MCP + ccloud) · Real-World Impact · Production Readiness (secure, observable,
+resilient, access-controlled) · Creativity & Originality.
+
 ## Hackathon submission checklist
 
-Public repo + detectable MIT license · proof of Alibaba Cloud deployment (code
-file link + short recording) · architecture diagram · ≤3-min video
-(YouTube/Vimeo/Youku, no copyrighted music) · text description · track
-identified (Track 1) · blog post link (separate $500 prize).
+Public repo + detectable MIT license (About section) · **functional demo app
+URL** · ≤3-min video (YouTube/Vimeo, public, shows the CockroachDB memory
+layer at work) · text description · write-up of which CockroachDB tools were
+used and what the agent did with them · write-up of which AWS services were
+used and how · architecture diagram (optional but do it) · feedback on
+CockroachDB AI tools (optional but do it).
