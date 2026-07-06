@@ -107,7 +107,15 @@ export async function writeFacts(input: {
       //    until the fact clears the gate or the merchant confirms.
       let ledgerEntryId: string | null = null;
       if (fact.class === "ledger" && fact.ledger && passes) {
-        const counterparty = resolved.find((r) => r.role === "counterparty");
+        // The ledger payload names whose account the money applies to; the
+        // entity tagged "counterparty" may be someone else (a payer acting
+        // on the debtor's behalf), so it is only trusted when names agree.
+        const counterpartyName = normalizeName(fact.ledger.counterparty);
+        const counterparty = resolved.find(
+          (r, i) =>
+            r.role === "counterparty" &&
+            normalizeName(fact.entities[i]?.name ?? "") === counterpartyName,
+        );
         ledgerEntryId = await createLedgerEntry(tx, {
           merchantId: input.merchantId,
           ledger: fact.ledger,
