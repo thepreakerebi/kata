@@ -155,3 +155,17 @@ layer at work) · text description · write-up of which CockroachDB tools were
 used and what the agent did with them · write-up of which AWS services were
 used and how · architecture diagram (optional but do it) · feedback on
 CockroachDB AI tools (optional but do it).
+
+## Production deployment (live)
+
+- **Demo URL: https://34.247.107.117.sslip.io** (Caddy auto-HTTPS via
+  sslip.io). EC2 `kata-demo` (REDACTED, t3.small, eu-west-1,
+  Ubuntu 24.04), SSH key `~/.ssh/deploy key` (user `ubuntu`).
+- Topology: Caddy :443 → Next.js :3000; the API binds :8787 **loopback
+  reachable only** (security group opens 22/80/443 only). Browser → server
+  proxy → API; the bearer token never leaves the box.
+- Services: `kata-api.service`, `kata-web.service` (systemd, restart
+  always). Deploy update: SSH in, `cd kata && git pull`, rebuild web if
+  needed, `sudo systemctl restart kata-api kata-web`.
+- Secrets live only in `apps/api/.env` / `apps/web/.env.local` on the box
+  (chmod 600) — never in user-data or the repo.
