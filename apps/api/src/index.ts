@@ -7,6 +7,7 @@ import { env } from "./env";
 import { startDecayLoop } from "./memory/decay";
 import { requireAuth } from "./middleware/auth";
 import { decayRoutes } from "./routes/decay";
+import { memoryRoutes } from "./routes/memories";
 import { queueRoutes } from "./routes/queue";
 import { recallRoutes } from "./routes/recall";
 import { simulatorRoutes } from "./routes/simulator";
@@ -39,6 +40,7 @@ app.route("/api/simulator", simulatorRoutes);
 app.route("/api/recall", recallRoutes);
 app.route("/api/queue", queueRoutes);
 app.route("/api/decay", decayRoutes);
+app.route("/api/memories", memoryRoutes);
 
 startDecayLoop();
 
