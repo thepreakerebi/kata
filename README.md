@@ -4,7 +4,8 @@
 built for businesses that run entirely on WhatsApp — with CockroachDB as the
 single memory layer.**
 
-🔗 **Live demo:** https://34.247.107.117.sslip.io ·
+🔗 **Live demo:** https://34.247.107.117.sslip.io — sign in with the demo
+password `kata-crdb-2026` ·
 🪳 Built for the [CockroachDB × AWS Hackathon — Build with Agentic Memory](https://cockroachdb-ai.devpost.com/)
 
 Millions of merchants run their whole operation — orders, customers, informal
@@ -158,7 +159,7 @@ apps/api/src/
 apps/web/app/
   dashboard/       memory brain · ask (recall traces) · queue · simulator ·
                    notebook import — behind signed-session auth
-docs/              architecture diagram · tools feedback · submission notes
+docs/              architecture diagram · tools feedback
 ```
 
 ## License

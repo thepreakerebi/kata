@@ -158,9 +158,8 @@ CockroachDB AI tools (optional but do it).
 
 ## Production deployment (live)
 
-- **Demo URL: https://34.247.107.117.sslip.io** (Caddy auto-HTTPS via
-  sslip.io). EC2 `kata-demo` (REDACTED, t3.small, eu-west-1,
-  Ubuntu 24.04), SSH key `~/.ssh/deploy key` (user `ubuntu`).
+- **Demo URL: https://34.247.107.117.sslip.io** (Amazon EC2, eu-west-1;
+  Caddy auto-HTTPS via sslip.io).
 - Topology: Caddy :443 → Next.js :3000; the API binds :8787 **loopback
   reachable only** (security group opens 22/80/443 only). Browser → server
   proxy → API; the bearer token never leaves the box.
@@ -168,4 +167,5 @@ CockroachDB AI tools (optional but do it).
   always). Deploy update: SSH in, `cd kata && git pull`, rebuild web if
   needed, `sudo systemctl restart kata-api kata-web`.
 - Secrets live only in `apps/api/.env` / `apps/web/.env.local` on the box
-  (chmod 600) — never in user-data or the repo.
+  (chmod 600) — never in user-data or the repo. Instance identifiers and
+  key paths stay out of the repo too.
