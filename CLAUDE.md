@@ -27,9 +27,11 @@ memory system.
   the entity graph, AND embeddings via CockroachDB's `VECTOR` type with
   **distributed vector indexing**. No separate vector store; the pitch is
   transactional consistency between ledger facts and their embeddings.
-- Models via **Amazon Bedrock**: chat + extraction + paper-notebook photo OCR
-  (multimodal Claude), embeddings (Titan Text Embeddings v2). Model IDs come
-  from env, never hard-coded.
+- Models via **Amazon Bedrock**, always through the model-agnostic **Converse
+  API**: chat + extraction + paper-notebook photo OCR (Nova Pro — account is
+  on the AWS Free plan, which blocks Marketplace-fulfilled Anthropic models;
+  swapping to Claude after a plan upgrade is one env var), embeddings (Titan
+  Text Embeddings v2). Model IDs come from env, never hard-coded.
 
 ### Required hackathon integrations (must be meaningful, not just initialized)
 

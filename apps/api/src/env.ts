@@ -4,10 +4,12 @@ const envSchema = z.object({
   // AWS credentials come from the standard chain (env vars locally, task role
   // on ECS) — only region and model IDs are validated here.
   AWS_REGION: z.string().min(1).default("us-east-1"),
+  // Model-agnostic via the Converse API — any Bedrock chat model with image
+  // input works here (Nova Pro on free-plan accounts, Claude on paid).
   BEDROCK_CHAT_MODEL_ID: z
     .string()
     .min(1)
-    .default("global.anthropic.claude-sonnet-4-5-20250929-v1:0"),
+    .default("eu.amazon.nova-pro-v1:0"),
   BEDROCK_EMBED_MODEL_ID: z
     .string()
     .min(1)
