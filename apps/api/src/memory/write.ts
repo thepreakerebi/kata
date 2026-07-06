@@ -42,7 +42,10 @@ export async function writeFacts(input: {
     const written: WrittenMemory[] = [];
 
     for (const [index, fact] of input.facts.entries()) {
-      // 1. Resolve (or create) the entities the fact is about.
+      // 1. Resolve (or create) the entities the fact is about. Chat names
+      //    drift ("Chinedu" for "Brother Chinedu"), so exact match falls
+      //    back to an unambiguous token-subset match within the same kind —
+      //    a duplicate entity splits the graph and the ledger.
       const resolved: { entityId: string; role: string }[] = [];
       for (const extracted of fact.entities) {
         const normalized = normalizeName(extracted.name);
@@ -59,6 +62,29 @@ export async function writeFacts(input: {
           .limit(1);
 
         let entityId = existing?.id;
+        if (!entityId) {
+          const sameKind = await tx
+            .select({ id: entities.id, normalizedName: entities.normalizedName })
+            .from(entities)
+            .where(
+              and(
+                eq(entities.merchantId, input.merchantId),
+                eq(entities.kind, extracted.kind),
+              ),
+            )
+            .limit(500);
+          const queryTokens = normalized.split(" ");
+          const isSubset = (a: string[], b: string[]) =>
+            a.every((token) => b.includes(token));
+          const matches = sameKind.filter((candidate) => {
+            const candidateTokens = candidate.normalizedName.split(" ");
+            return (
+              isSubset(queryTokens, candidateTokens) ||
+              isSubset(candidateTokens, queryTokens)
+            );
+          });
+          if (matches.length === 1) entityId = matches[0]!.id;
+        }
         if (!entityId) {
           const [created] = await tx
             .insert(entities)

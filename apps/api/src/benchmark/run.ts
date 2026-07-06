@@ -31,7 +31,10 @@ import { scoreAnswer, type QuestionScore } from "./score";
 
 const BUDGET = 800;
 const MERCHANT_NAME = "Benchmark Merchant";
-const CONCURRENCY = 5;
+// Fuzzy entity resolution reads the merchant's entity set inside each write
+// transaction, so high ingest concurrency turns into serializable-conflict
+// churn; two lanes is the sweet spot.
+const CONCURRENCY = 2;
 
 async function resetBenchMerchant(): Promise<string> {
   const [existing] = await db

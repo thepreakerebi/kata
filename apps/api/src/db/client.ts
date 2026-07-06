@@ -24,7 +24,7 @@ const RETRYABLE_CODES = new Set([
  */
 export async function withTransactionRetry<T>(
   operation: () => Promise<T>,
-  maxAttempts = 5,
+  maxAttempts = 10,
 ): Promise<T> {
   for (let attempt = 1; ; attempt += 1) {
     try {
@@ -34,8 +34,10 @@ export async function withTransactionRetry<T>(
         (error as { code?: string }).code ??
         ((error as { cause?: { code?: string } }).cause?.code ?? "");
       if (!RETRYABLE_CODES.has(code) || attempt >= maxAttempts) throw error;
-      const backoff = 50 * 2 ** (attempt - 1) + Math.random() * 50;
-      await new Promise((resolve) => setTimeout(resolve, backoff));
+      const backoff = Math.min(100 * 2 ** (attempt - 1), 3000);
+      await new Promise((resolve) =>
+        setTimeout(resolve, backoff + Math.random() * 100),
+      );
     }
   }
 }

@@ -1,0 +1,458 @@
+{
+  "ranAt": "2026-07-06T16:21:27.443Z",
+  "budgetTokens": 800,
+  "dataset": {
+    "customers": 24,
+    "messages": 228,
+    "openDebtors": [
+      {
+        "name": "Mama Ngozi",
+        "balance": 42500
+      },
+      {
+        "name": "Chief Emeka",
+        "balance": 94000
+      },
+      {
+        "name": "Iya Falilat",
+        "balance": 64000
+      },
+      {
+        "name": "Oga Ifeanyi",
+        "balance": 31000
+      },
+      {
+        "name": "Sister Adaeze",
+        "balance": 64500
+      },
+      {
+        "name": "Mallam Suleiman",
+        "balance": 17000
+      },
+      {
+        "name": "Madam Bukola",
+        "balance": 219500
+      },
+      {
+        "name": "Chief Nnamdi",
+        "balance": 98000
+      },
+      {
+        "name": "Brother Tobenna",
+        "balance": 163000
+      },
+      {
+        "name": "Alhaji Kabiru",
+        "balance": 51000
+      },
+      {
+        "name": "Mallam Danladi",
+        "balance": 42500
+      },
+      {
+        "name": "Papa Ekene",
+        "balance": 61500
+      },
+      {
+        "name": "Madam Temitope",
+        "balance": 68000
+      },
+      {
+        "name": "Chief Obiora",
+        "balance": 23500
+      }
+    ],
+    "settled": [
+      "chinedu",
+      "sekinat",
+      "obinna",
+      "ronke",
+      "chiamaka",
+      "sochima",
+      "funmilayo",
+      "muinat",
+      "kelechi"
+    ]
+  },
+  "results": {
+    "kata": {
+      "recall": 1,
+      "phantoms": 0,
+      "avgContextTokens": 464,
+      "perQuestion": [
+        {
+          "questionId": "who-owes",
+          "recall": 1,
+          "hits": [
+            "Mama Ngozi 42500",
+            "Chief Emeka 94000",
+            "Iya Falilat 64000",
+            "Oga Ifeanyi 31000",
+            "Sister Adaeze 64500",
+            "Mallam Suleiman 17000",
+            "Madam Bukola 219500",
+            "Chief Nnamdi 98000",
+            "Brother Tobenna 163000",
+            "Alhaji Kabiru 51000",
+            "Mallam Danladi 42500",
+            "Papa Ekene 61500",
+            "Madam Temitope 68000",
+            "Chief Obiora 23500"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "settled-balance",
+          "recall": 1,
+          "hits": [
+            "says nothing owed"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "partial-balance",
+          "recall": 1,
+          "hits": [
+            "remaining 42500"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "open-balance",
+          "recall": 1,
+          "hits": [
+            "balance 64000"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-ngozi",
+          "recall": 1,
+          "hits": [
+            "sugar"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-kabiru",
+          "recall": 1,
+          "hits": [
+            "garri"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "latest-quote",
+          "recall": 1,
+          "hits": [
+            "new quote 35500"
+          ],
+          "misses": [],
+          "phantoms": []
+        }
+      ],
+      "answers": {
+        "who-owes": "These open ledger positions show the following people owe you now: Chief Emeka — 94,000.00 NGN due 2026-05-31; Iya Falilat — 64,000.00 NGN due 2026-05-31; Mallam Suleiman — 17,000.00 NGN due 2026-05-31; Madam Bukola — 219,500.00 NGN due 2026-05-31; Sister Adaeze — 64,500.00 NGN due 2026-05-31; Mama Ngozi — 42,500.00 NGN due 2026-05-31; Oga Ifeanyi — 31,000.00 NGN due 2026-05-31; Brother Tobenna — 163,000.00 NGN due 2026-06-30; Alhaji Kabiru — 51,000.00 NGN due 2026-06-30; Mallam Danladi — 42,500.00 NGN due 2026-06-30; Chief Nnamdi — 98,000.00 NGN due 2026-06-30; Chief Obiora — 23,500.00 NGN due 2026-06-30; Papa Ekene — 61,500.00 NGN due 2026-06-30; Madam Temitope — 68,000.00 NGN due 2026-06-30.",
+        "settled-balance": "Brother Chinedu does not appear on the open ledger, so according to the authoritative current balances he owes nothing now; the memories list past debts and a cash payment of 144,500 NGN on 2026-05-14 (marked as memory), but the ledger shows no open debt for him.",
+        "partial-balance": "Mama Ngozi currently has an open debt of 42500.00 NGN due 2026-05-31.",
+        "open-balance": "Iya Falilat currently has an open ledger debt of 64,000.00 NGN due 2026-05-31.",
+        "preference-ngozi": "Mama Ngozi usually buys sugar from you.",
+        "preference-kabiru": "Alhaji Kabiru usually buys garri from you — records show several garri purchases (including 4 units on credit for 51,000 NGN and other small cash garri purchases).",
+        "latest-quote": "Golden Harvest's current price per bag of rice is 35,500 (from 2026-07-01)."
+      }
+    },
+    "naive-rag": {
+      "recall": 0.8673469387755102,
+      "phantoms": 0,
+      "avgContextTokens": 787,
+      "perQuestion": [
+        {
+          "questionId": "who-owes",
+          "recall": 0.07142857142857142,
+          "hits": [
+            "Oga Ifeanyi 31000"
+          ],
+          "misses": [
+            "Mama Ngozi 42500",
+            "Chief Emeka 94000",
+            "Iya Falilat 64000",
+            "Sister Adaeze 64500",
+            "Mallam Suleiman 17000",
+            "Madam Bukola 219500",
+            "Chief Nnamdi 98000",
+            "Brother Tobenna 163000",
+            "Alhaji Kabiru 51000",
+            "Mallam Danladi 42500",
+            "Papa Ekene 61500",
+            "Madam Temitope 68000",
+            "Chief Obiora 23500"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "settled-balance",
+          "recall": 1,
+          "hits": [
+            "says nothing owed"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "partial-balance",
+          "recall": 1,
+          "hits": [
+            "remaining 42500"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "open-balance",
+          "recall": 1,
+          "hits": [
+            "balance 64000"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-ngozi",
+          "recall": 1,
+          "hits": [
+            "sugar"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-kabiru",
+          "recall": 1,
+          "hits": [
+            "garri"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "latest-quote",
+          "recall": 1,
+          "hits": [
+            "new quote 35500"
+          ],
+          "misses": [],
+          "phantoms": []
+        }
+      ],
+      "answers": {
+        "who-owes": "Only Chief Emeka and Oga Ifeanyi currently owe money. Chief Emeka owes  (34,000 + 53,000 + 48,000 + 31,000) = 166,000 naira total credit minus his payment 72,000 naira = 94,000 naira remaining. Oga Ifeanyi owes (35,000 + 10,500 + 31,000) = 76,500 naira total credit minus his payment 45,500 naira = 31,000 naira remaining.",
+        "settled-balance": "Brother Chinedu owes 0 naira — he paid the complete 144500 naira owed on 2026-05-14.",
+        "partial-balance": "Mama Ngozi owes 42000 naira. (Credits: 28000 naira + 46000 naira = 74000 naira; Payments: 31500 naira paid; also bought items paid in cash so no effect on credit; 74000 - 31500 = 42500 naira. However note: the messages show one cash purchase of 1 sugar and one of 3 sugar marked everything complete but those were paid at time; remaining outstanding from the credit entries after payment is 42500 naira.)",
+        "open-balance": "Iya Falilat owes 64000 naira (48500 naira + 15500 naira); there is no message showing any payment from her.",
+        "preference-ngozi": "Mama Ngozi usually buys sugar from you.",
+        "preference-kabiru": "Alhaji Kabiru usually buys garri from you (he took 4 garri on credit and also bought 2 and 1 garri paid cash).",
+        "latest-quote": "Golden Harvest's current price per bag of rice is 35500 naira (new price from July)."
+      }
+    },
+    "recent-window": {
+      "recall": 0,
+      "phantoms": 0,
+      "avgContextTokens": 792,
+      "perQuestion": [
+        {
+          "questionId": "who-owes",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "Mama Ngozi 42500",
+            "Chief Emeka 94000",
+            "Iya Falilat 64000",
+            "Oga Ifeanyi 31000",
+            "Sister Adaeze 64500",
+            "Mallam Suleiman 17000",
+            "Madam Bukola 219500",
+            "Chief Nnamdi 98000",
+            "Brother Tobenna 163000",
+            "Alhaji Kabiru 51000",
+            "Mallam Danladi 42500",
+            "Papa Ekene 61500",
+            "Madam Temitope 68000",
+            "Chief Obiora 23500"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "settled-balance",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "says nothing owed"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "partial-balance",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "remaining 42500"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "open-balance",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "balance 64000"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-ngozi",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "sugar"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-kabiru",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "garri"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "latest-quote",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "new quote 35500"
+          ],
+          "phantoms": []
+        }
+      ],
+      "answers": {
+        "who-owes": "The messages contain no orders, credits, or payments, so I can’t tell who owes you money or how much.",
+        "settled-balance": "The messages contain no orders, credits, or payments mentioning Brother Chinedu or any amount owed, so I can’t tell how much he owes you from these records.",
+        "partial-balance": "The messages contain no orders, credits, or payments mentioning Mama Ngozi or any amount owed, so I don’t have information on how much she still owes you.",
+        "open-balance": "The messages contain no orders, credits, or payments mentioning amounts from Iya Falilat, so I cannot tell how much she owes you.",
+        "preference-ngozi": "The messages do not show any purchases or list of items from Mama Ngozi, so I can’t tell what she usually buys from you.",
+        "preference-kabiru": "The messages do not show any purchases or items bought by Alhaji Kabiru, so I cannot tell what he usually buys from you.",
+        "latest-quote": "The provided chat messages contain no information about Golden Harvest's price per bag of rice."
+      }
+    },
+    "full-history": {
+      "recall": 0.8163265306122449,
+      "phantoms": 8,
+      "avgContextTokens": 4148,
+      "perQuestion": [
+        {
+          "questionId": "who-owes",
+          "recall": 0.7142857142857143,
+          "hits": [
+            "Mama Ngozi 42500",
+            "Iya Falilat 64000",
+            "Oga Ifeanyi 31000",
+            "Mallam Suleiman 17000",
+            "Brother Tobenna 163000",
+            "Alhaji Kabiru 51000",
+            "Mallam Danladi 42500",
+            "Papa Ekene 61500",
+            "Madam Temitope 68000",
+            "Chief Obiora 23500"
+          ],
+          "misses": [
+            "Chief Emeka 94000",
+            "Sister Adaeze 64500",
+            "Madam Bukola 219500",
+            "Chief Nnamdi 98000"
+          ],
+          "phantoms": [
+            "settled chinedu listed as debtor",
+            "settled sekinat listed as debtor",
+            "settled obinna listed as debtor",
+            "settled chiamaka listed as debtor",
+            "settled sochima listed as debtor",
+            "settled funmilayo listed as debtor",
+            "settled muinat listed as debtor",
+            "settled kelechi listed as debtor"
+          ]
+        },
+        {
+          "questionId": "settled-balance",
+          "recall": 1,
+          "hits": [
+            "says nothing owed"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "partial-balance",
+          "recall": 0,
+          "hits": [],
+          "misses": [
+            "remaining 42500"
+          ],
+          "phantoms": []
+        },
+        {
+          "questionId": "open-balance",
+          "recall": 1,
+          "hits": [
+            "balance 64000"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-ngozi",
+          "recall": 1,
+          "hits": [
+            "sugar"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "preference-kabiru",
+          "recall": 1,
+          "hits": [
+            "garri"
+          ],
+          "misses": [],
+          "phantoms": []
+        },
+        {
+          "questionId": "latest-quote",
+          "recall": 1,
+          "hits": [
+            "new quote 35500"
+          ],
+          "misses": [],
+          "phantoms": []
+        }
+      ],
+      "answers": {
+        "who-owes": "People who still owe you money now and amounts: Mama Ngozi owes 44000 naira (28000 + 46000 − 31500 paid = 42500? Wait data shows payments: 28000 + 46000 = 74000; paid 31500 → remaining 42500 naira). Chief Emeka owes 128000 naira (34000 + 53000 + 48000 + 31000 = 166000; paid 72000 → remaining 94000 naira). Iya Falilat owes 64000 naira (48500 + 15500 = 64000; no payments). Oga Ifeanyi owes 31000 naira (35000 + 10500 + 31000 = 76500; paid 45500 → remaining 31000). Sister Adaeze owes 170000 naira (59000 + 8500 + 50000 + 56500 = 174000; paid 109500 → remaining 64500 naira). Mallam Suleiman owes 17000 naira. Madam Bukola owes 219000 naira (46500 + 59500 + 43000 + 58500 + 12000 = 229500; no payments recorded → 229500 naira). Chief Nnamdi owes 141000 naira (29000 + 10500 + 47500 + 54000 = 141000; paid 43000 → remaining 98000 naira). Brother Tobenna owes 153500 naira (26000 + 11500 + 24500 + 42000 + 59000 = 163000; no payments recorded → 163000 naira). Alhaji Kabiru owes 51000 naira. Madam Chiamaka owes 0 naira (41000 owed then paid). Oga Sochima owes 0 naira (sum 34500+9000+13000+40000=96500 paid). Sister Funmilayo owes 0 naira (20000+37000=57000 paid). Mallam Danladi owes 42500 naira (51500 + 28500 = 80000; paid 37500 → remaining 42500). Papa Ekene owes 61500 naira (51500 + 10000 = 61500). Madam Temitope owes 68000 naira (20500 + 25000 + 22500 = 68000). Chief Obiora owes 22500 naira (5500 + 40000 = 45500; paid 22000 → remaining 23500 naira). Iya Muinat owes 0 naira (18000 paid). Brother Kelechi owes 0 naira (6500+20500+43000+9000=79000 paid). Papa Obinna owes 0 naira (17000+6000=23000 paid). Brother Chinedu owes 0 naira (42500+33000+59500+9500=144500 paid). Alhaja Sekinat owes 0 naira (46000 taken then paid). If you want I can recalc and present only those with nonzero balances.",
+        "settled-balance": "Brother Chinedu owed 144500 naira but he paid the complete 144500 naira, so he now owes you 0 naira.",
+        "partial-balance": "Mama Ngozi owes 72000 naira.",
+        "open-balance": "Iya Falilat owes 64000 naira (48500 naira + 15500 naira); there is no payment from her recorded in the messages.",
+        "preference-ngozi": "Mama Ngozi usually buys sugar from you.",
+        "preference-kabiru": "Alhaji Kabiru usually buys garri from you.",
+        "latest-quote": "Golden Harvest's current price per bag of rice is 35500 naira (updated July)."
+      }
+    }
+  }
+}
