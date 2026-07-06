@@ -5,6 +5,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { bodyLimit } from "hono/body-limit";
 import { env } from "./env";
 import { startDecayLoop } from "./memory/decay";
+import { startWhatsApp } from "./whatsapp/adapter";
 import { requireAuth } from "./middleware/auth";
 import { decayRoutes } from "./routes/decay";
 import { memoryRoutes } from "./routes/memories";
@@ -43,6 +44,9 @@ app.route("/api/decay", decayRoutes);
 app.route("/api/memories", memoryRoutes);
 
 startDecayLoop();
+startWhatsApp().catch((error) => {
+  console.error("whatsapp: failed to start:", (error as Error).message);
+});
 
 export default {
   port: env.PORT,

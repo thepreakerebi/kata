@@ -20,6 +20,12 @@ const envSchema = z.object({
     .transform((value) => value.split(",").map((origin) => origin.trim())),
   SESSION_SECRET: z.string().min(32, "SESSION_SECRET must be at least 32 chars"),
   WA_AUTH_DIR: z.string().default("./auth-state"),
+  // WhatsApp only starts when explicitly enabled — the API must run
+  // (dev, CI, judges without a paired phone) without a Baileys session.
+  WA_ENABLED: z
+    .string()
+    .default("false")
+    .transform((value) => value === "true"),
 });
 
 export type Env = z.infer<typeof envSchema>;
