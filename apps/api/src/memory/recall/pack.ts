@@ -6,6 +6,7 @@ export type PackedItem = {
   class: string;
   status: string;
   content: string;
+  createdAt: string;
   score: number;
   tokens: number;
   reasons: string[];
@@ -90,7 +91,10 @@ export function pack(input: {
   // Ledger lines are deterministic facts — they take budget first.
   const ledgerTokens = input.ledgerLines.reduce(
     (sum, line) =>
-      sum + estimateTokens(`${line.counterparty} ${line.amount} ${line.note}`),
+      sum +
+      estimateTokens(
+        `${line.counterparty} ${line.kind} ${line.amount} ${line.currency} ${line.dueDate ?? ""}`,
+      ),
     0,
   );
 
@@ -114,6 +118,7 @@ export function pack(input: {
         class: candidate.class,
         status: candidate.status,
         content: candidate.content,
+        createdAt: candidate.createdAt.toISOString().slice(0, 10),
         score: Number(value.toFixed(3)),
         tokens,
         reasons,

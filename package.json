@@ -10,12 +10,5 @@
     "dev:web": "bun run --cwd apps/web dev",
     "build": "bun run --cwd apps/api build && bun run --cwd apps/web build",
     "typecheck": "bun run --cwd apps/api typecheck && bun run --cwd apps/web typecheck"
-  },
-  "dependencies": {
-    "@whiskeysockets/baileys": "^7.0.0-rc13",
-    "qrcode-terminal": "^0.12.0"
-  },
-  "devDependencies": {
-    "@types/qrcode-terminal": "^0.12.2"
   }
 }

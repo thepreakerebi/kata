@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { z } from "zod";
-import { db } from "@/db/client";
+import { db, withTransactionRetry } from "@/db/client";
 import { memories } from "@/db/schema";
 import { embed } from "@/llm/client";
 import { createLedgerEntry, type LedgerPayload } from "./ledger";
@@ -81,7 +81,8 @@ export async function confirmMemory(input: {
     }
   }
 
-  const ledgerEntryId = await db.transaction(async (tx) => {
+  const ledgerEntryId = await withTransactionRetry(() =>
+    db.transaction(async (tx) => {
     let entryId: string | null = null;
     if (ledger) {
       entryId = await createLedgerEntry(tx, {
@@ -108,7 +109,7 @@ export async function confirmMemory(input: {
       .where(eq(memories.id, memory.id));
 
     return entryId;
-  });
+  }));
 
   return { ok: true, status: "active", ledgerEntryId };
 }

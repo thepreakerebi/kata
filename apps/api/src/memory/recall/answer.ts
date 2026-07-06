@@ -3,11 +3,16 @@ import { completeJson } from "@/llm/client";
 import type { PackResult } from "./pack";
 
 const answerSchema = z.object({
-  answer: z.string().min(1).max(2000),
+  answer: z
+    .string()
+    .min(1)
+    .transform((value) => value.slice(0, 4000)),
 });
 
 const SYSTEM_PROMPT = `You answer a merchant's question using ONLY the memory context provided. Rules:
 - "Open ledger positions" are the authoritative CURRENT balances — payments already applied. When a memory mentions a different amount for the same person, the memory is history; the ledger line wins. Someone absent from the open ledger owes nothing now, even if a memory says they took goods on credit.
+- Memories are dated. When two memories conflict (a price changed, a preference shifted), the newest is the truth — state only the current value, do not repeat the superseded one.
+- When asked who owes money, list exactly the people with open debt lines and their totals — do not mention anyone who has paid up or appears only in memories.
 - Never invent names, amounts, or dates that are not in the context.
 - Facts marked [unconfirmed] are awaiting the merchant's confirmation — if you use one, say it is unconfirmed. Facts without that mark are confirmed: never call them unconfirmed or say they need verification.
 - Money answers state amounts with currency and due dates when known.
@@ -21,10 +26,10 @@ export async function answerFromMemory(input: {
 }): Promise<string> {
   const ledgerBlock =
     input.pack.ledgerLines.length > 0
-      ? `Open ledger positions:\n${input.pack.ledgerLines
+      ? `Open ledger positions (one line per person, already totalled):\n${input.pack.ledgerLines
           .map(
             (line) =>
-              `- ${line.counterparty}: ${line.kind} ${line.amount} ${line.currency}${line.dueDate ? `, due ${line.dueDate}` : ""}${line.note ? ` (${line.note})` : ""}`,
+              `- ${line.counterparty}: ${line.kind} ${line.amount} ${line.currency}${line.dueDate ? `, due ${line.dueDate}` : ""}`,
           )
           .join("\n")}`
       : "";
@@ -34,7 +39,7 @@ export async function answerFromMemory(input: {
       ? `Memories:\n${input.pack.packed
           .map(
             (item) =>
-              `- ${item.status === "pending" ? "[unconfirmed] " : ""}${item.content}`,
+              `- [${item.createdAt}]${item.status === "pending" ? " [unconfirmed]" : ""} ${item.content}`,
           )
           .join("\n")}`
       : "";

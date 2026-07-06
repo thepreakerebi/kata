@@ -1,5 +1,5 @@
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "@/db/client";
+import { db, withTransactionRetry } from "@/db/client";
 import { entities, entityEdges, memories, memoryEntities } from "@/db/schema";
 import { embedMany } from "@/llm/client";
 import type { ExtractedFact } from "./extract";
@@ -38,7 +38,7 @@ export async function writeFacts(input: {
     input.facts.map((fact) => fact.content),
   );
 
-  return db.transaction(async (tx) => {
+  return withTransactionRetry(() => db.transaction(async (tx) => {
     const written: WrittenMemory[] = [];
 
     for (const [index, fact] of input.facts.entries()) {
@@ -170,5 +170,5 @@ export async function writeFacts(input: {
     }
 
     return written;
-  });
+  }));
 }

@@ -101,6 +101,10 @@ memory system.
 - `postgres.js` placeholders can fail on CRDB catalog queries with "could not
   determine data type of placeholder" — cast explicitly or use `sql.unsafe`
   for introspection-style queries.
+- CockroachDB runs SERIALIZABLE: concurrent transactions can abort with
+  code 40001 (`RETRY_SERIALIZABLE`) by design. Every multi-statement write
+  goes through `withTransactionRetry` from `db/client.ts` (backoff + jitter,
+  also retries 23505 insert races) — never call `db.transaction` bare.
 
 ## Engineering rules
 

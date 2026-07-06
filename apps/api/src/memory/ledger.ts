@@ -16,7 +16,14 @@ export function normalizeName(name: string): string {
   return name.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-/** Find or create the customer entity a ledger entry is against. */
+/**
+ * Find or create the customer entity a ledger entry is against.
+ * Chat names drift ("Chinedu" for "Brother Chinedu"), and money applied to
+ * a duplicate entity never settles the real account — so after an exact
+ * match fails, a token-subset match against existing customers wins when it
+ * is unambiguous. Zero or multiple candidates create a fresh entity: a
+ * wrong merge is worse than a duplicate.
+ */
 export async function resolveCounterparty(
   tx: Tx,
   input: { merchantId: string; name: string },
@@ -34,6 +41,29 @@ export async function resolveCounterparty(
     )
     .limit(1);
   if (existing) return existing.id;
+
+  const customers = await tx
+    .select({ id: entities.id, normalizedName: entities.normalizedName })
+    .from(entities)
+    .where(
+      and(
+        eq(entities.merchantId, input.merchantId),
+        eq(entities.kind, "customer"),
+      ),
+    )
+    .limit(500);
+
+  const queryTokens = normalized.split(" ");
+  const isSubset = (a: string[], b: string[]) =>
+    a.every((token) => b.includes(token));
+  const matches = customers.filter((customer) => {
+    const candidateTokens = customer.normalizedName.split(" ");
+    return (
+      isSubset(queryTokens, candidateTokens) ||
+      isSubset(candidateTokens, queryTokens)
+    );
+  });
+  if (matches.length === 1) return matches[0]!.id;
 
   const [created] = await tx
     .insert(entities)
@@ -128,8 +158,74 @@ export async function applyPaymentToDebts(
 }
 
 /**
+ * The symmetric half of settlement: a new debt first consumes any open
+ * credit the customer has on account (unapplied payments), so out-of-order
+ * arrival (payment recorded before its debt was confirmed) still nets out.
+ */
+export async function applyOpenCreditsToDebt(
+  tx: Tx,
+  input: {
+    merchantId: string;
+    debtEntryId: string;
+    counterpartyEntityId: string;
+    amount: number;
+    currency: string;
+  },
+): Promise<void> {
+  const credits = await tx
+    .select({ id: ledgerEntries.id, amount: ledgerEntries.amount })
+    .from(ledgerEntries)
+    .where(
+      and(
+        eq(ledgerEntries.merchantId, input.merchantId),
+        eq(ledgerEntries.counterpartyEntityId, input.counterpartyEntityId),
+        eq(ledgerEntries.kind, "payment"),
+        eq(ledgerEntries.status, "open"),
+        eq(ledgerEntries.currency, input.currency),
+      ),
+    )
+    .orderBy(asc(ledgerEntries.createdAt));
+
+  let remainingDebt = input.amount;
+  for (const credit of credits) {
+    if (remainingDebt <= 0) break;
+    const available = Number(credit.amount);
+    if (available <= remainingDebt) {
+      await tx
+        .update(ledgerEntries)
+        .set({ status: "settled", settledAt: new Date(), updatedAt: new Date() })
+        .where(eq(ledgerEntries.id, credit.id));
+      remainingDebt -= available;
+    } else {
+      await tx
+        .update(ledgerEntries)
+        .set({ amount: (available - remainingDebt).toFixed(2), updatedAt: new Date() })
+        .where(eq(ledgerEntries.id, credit.id));
+      remainingDebt = 0;
+    }
+  }
+
+  if (remainingDebt <= 0) {
+    await tx
+      .update(ledgerEntries)
+      .set({ status: "settled", settledAt: new Date(), updatedAt: new Date() })
+      .where(eq(ledgerEntries.id, input.debtEntryId));
+    await tx
+      .update(memories)
+      .set({ pinned: false, updatedAt: new Date() })
+      .where(eq(memories.ledgerEntryId, input.debtEntryId));
+  } else if (remainingDebt < input.amount) {
+    await tx
+      .update(ledgerEntries)
+      .set({ amount: remainingDebt.toFixed(2), updatedAt: new Date() })
+      .where(eq(ledgerEntries.id, input.debtEntryId));
+  }
+}
+
+/**
  * Create the transactional row backing a confirmed money fact. Payments are
- * immediately applied against the counterparty's open debts.
+ * immediately applied against the counterparty's open debts, and new debts
+ * consume any open credit on the account.
  */
 export async function createLedgerEntry(
   tx: Tx,
@@ -166,6 +262,14 @@ export async function createLedgerEntry(
     await applyPaymentToDebts(tx, {
       merchantId: input.merchantId,
       paymentEntryId: entry!.id,
+      counterpartyEntityId,
+      amount: input.ledger.amount,
+      currency: input.ledger.currency,
+    });
+  } else if (input.ledger.kind === "debt") {
+    await applyOpenCreditsToDebt(tx, {
+      merchantId: input.merchantId,
+      debtEntryId: entry!.id,
       counterpartyEntityId,
       amount: input.ledger.amount,
       currency: input.ledger.currency,

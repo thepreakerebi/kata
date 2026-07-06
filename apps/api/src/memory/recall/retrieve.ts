@@ -27,14 +27,17 @@ export type Candidate = {
   };
 };
 
-/** Open money positions, fetched deterministically for ledger questions. */
+/**
+ * Open money positions, fetched deterministically for ledger questions —
+ * aggregated per counterparty: the merchant thinks in balances, not
+ * journal rows.
+ */
 export type LedgerLine = {
   counterparty: string;
   kind: string;
   amount: string;
   currency: string;
   dueDate: string | null;
-  note: string | null;
 };
 
 const VECTOR_K = 12;
@@ -222,10 +225,9 @@ export async function retrieve(input: {
       .select({
         counterparty: entities.name,
         kind: ledgerEntries.kind,
-        amount: ledgerEntries.amount,
+        amount: sql<string>`sum(${ledgerEntries.amount})`,
         currency: ledgerEntries.currency,
-        dueDate: ledgerEntries.dueDate,
-        note: ledgerEntries.note,
+        dueDate: sql<string | null>`min(${ledgerEntries.dueDate})`,
       })
       .from(ledgerEntries)
       .innerJoin(entities, eq(ledgerEntries.counterpartyEntityId, entities.id))
@@ -235,7 +237,8 @@ export async function retrieve(input: {
           eq(ledgerEntries.status, "open"),
         ),
       )
-      .orderBy(ledgerEntries.dueDate)
+      .groupBy(entities.name, ledgerEntries.kind, ledgerEntries.currency)
+      .orderBy(sql`min(${ledgerEntries.dueDate}) NULLS LAST`)
       .limit(50);
     ledgerLines = rows;
   }

@@ -26,17 +26,38 @@ const rawLedgerSchema = z.object({
   counterparty: z.string().min(1).max(200).nullish(),
 });
 
+// A malformed entity (missing name, wrong shape) drops silently — one bad
+// item must never reject the whole extraction.
+const lenientEntities = z
+  .array(z.unknown())
+  .default([])
+  .transform((items) =>
+    items.slice(0, 10).flatMap((item) => {
+      const parsed = rawEntitySchema.safeParse(item);
+      return parsed.success ? [parsed.data] : [];
+    }),
+  );
+
 const rawFactSchema = z.object({
   class: z.enum(["episodic", "semantic", "procedural", "ledger"]),
   content: z.string().min(1).max(1000),
   confidence: z.number().min(0).max(1),
   structured: z.record(z.string(), z.unknown()).nullish(),
-  entities: z.array(rawEntitySchema).max(10).default([]),
+  entities: lenientEntities,
   ledger: rawLedgerSchema.nullish(),
 });
 
+// Same leniency per fact: keep every fact that parses, shed the rest.
 const rawExtractionSchema = z.object({
-  facts: z.array(rawFactSchema).max(20).default([]),
+  facts: z
+    .array(z.unknown())
+    .default([])
+    .transform((items) =>
+      items.slice(0, 20).flatMap((item) => {
+        const parsed = rawFactSchema.safeParse(item);
+        return parsed.success ? [parsed.data] : [];
+      }),
+    ),
 });
 
 export type ExtractedFact = {
@@ -104,6 +125,8 @@ Return JSON: {"facts": [...]}. Each fact:
 - "structured": optional typed payload (e.g. {"item":"rice","quantity":2,"unit_price":22500}).
 - "entities": people/businesses/products the fact is about. "kind" must be exactly one of: "customer", "supplier", "product", "other". "role" must be exactly one of: "subject" (who the fact is about), "object" (what it concerns), "counterparty" (whoever owes or is owed).
 - "ledger": ONLY for class "ledger": {"kind","amount","currency","dueDate","counterparty"}. "kind" is exactly "debt" (someone owes the merchant), "payment" (money received against what they owed), or "credit" (the merchant owes someone). "amount" is a number, null if the message names no amount. "currency" is a 3-letter code, null if unstated. Resolve relative dates against the message date; "dueDate" is "YYYY-MM-DD" or null. "counterparty" is the person whose account the money applies to: for a debt, who owes; for a payment, whose debt is being settled — if someone pays on another person's behalf ("Chief paid for Mama C"), the counterparty is the debtor, not the physical payer. Null if unclear.
+
+A sale paid in full on the spot is "episodic", not a ledger fact — ledger "payment" is only money received against an existing balance.
 
 Today's message date is provided. Messages may mix English, Pidgin, and shorthand. Extract only what the message states — never invent amounts or names. A message with nothing worth remembering yields {"facts": []}.`;
 
