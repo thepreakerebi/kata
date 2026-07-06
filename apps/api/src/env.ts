@@ -12,7 +12,8 @@ const envSchema = z.object({
     .string()
     .min(1)
     .default("amazon.titan-embed-text-v2:0"),
-  S3_BUCKET: z.string().min(1, "S3_BUCKET is required"),
+  // Empty until AWS is provisioned; media code asserts presence at use time.
+  S3_BUCKET: z.string().default(""),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
   PORT: z.coerce.number().int().positive().default(8787),
   CORS_ORIGINS: z

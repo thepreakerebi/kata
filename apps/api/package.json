@@ -6,7 +6,10 @@
     "dev": "bun run --hot src/index.ts",
     "start": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit"
+    "build": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:setup": "bun run src/db/setup.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.44.0",

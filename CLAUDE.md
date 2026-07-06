@@ -85,6 +85,21 @@ memory system.
   indents.
 - Error copy is concise and actionable; never leak raw backend errors to the UI.
 
+## Database workflow (CockroachDB)
+
+- Schema changes: edit `apps/api/src/db/schema/`, then `bun run db:generate` →
+  `bun run db:migrate` → `bun run db:setup`. Migrations are **committed** —
+  judges must be able to reproduce the database.
+- **Never use `drizzle-kit push` against CockroachDB** — its enum resolver
+  hangs on an interactive prompt (CRDB introspection confuses it) and
+  `--force` does not bypass it. generate + migrate works cleanly.
+- Vector indexes are CockroachDB-specific DDL (`CREATE VECTOR INDEX`) that
+  drizzle-kit cannot emit; they live in `apps/api/src/db/setup.ts`
+  (idempotent) and must be re-run after schema changes touching embeddings.
+- `postgres.js` placeholders can fail on CRDB catalog queries with "could not
+  determine data type of placeholder" — cast explicitly or use `sql.unsafe`
+  for introspection-style queries.
+
 ## Engineering rules
 
 - **Commit at every milestone.** Small, frequent commits — never one large
