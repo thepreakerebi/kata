@@ -8,6 +8,7 @@ import { startDecayLoop } from "./memory/decay";
 import { startWhatsApp } from "./whatsapp/adapter";
 import { requireAuth } from "./middleware/auth";
 import { decayRoutes } from "./routes/decay";
+import { importRoutes } from "./routes/import";
 import { memoryRoutes } from "./routes/memories";
 import { queueRoutes } from "./routes/queue";
 import { recallRoutes } from "./routes/recall";
@@ -23,6 +24,14 @@ app.use(
     origin: env.CORS_ORIGINS,
     allowMethods: ["GET", "POST", "PATCH", "DELETE"],
     credentials: true,
+  }),
+);
+// Notebook-photo imports carry a base64 image; everything else stays small.
+app.use(
+  "/api/import/*",
+  bodyLimit({
+    maxSize: 12 * 1024 * 1024,
+    onError: (c) => c.json({ error: "Image too large (max 8 MB)" }, 413),
   }),
 );
 app.use(
@@ -42,6 +51,7 @@ app.route("/api/recall", recallRoutes);
 app.route("/api/queue", queueRoutes);
 app.route("/api/decay", decayRoutes);
 app.route("/api/memories", memoryRoutes);
+app.route("/api/import", importRoutes);
 
 startDecayLoop();
 startWhatsApp().catch((error) => {

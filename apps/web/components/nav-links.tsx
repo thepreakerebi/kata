@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Brain, Inbox, MessageCircleQuestion, Terminal } from "lucide-react";
+import {
+  Brain,
+  Camera,
+  Inbox,
+  MessageCircleQuestion,
+  Terminal,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
@@ -10,6 +16,7 @@ const LINKS = [
   { href: "/dashboard/ask", label: "Ask", icon: MessageCircleQuestion },
   { href: "/dashboard/queue", label: "Queue", icon: Inbox },
   { href: "/dashboard/simulator", label: "Simulator", icon: Terminal },
+  { href: "/dashboard/import", label: "Import", icon: Camera },
 ] as const;
 
 export function NavLinks() {

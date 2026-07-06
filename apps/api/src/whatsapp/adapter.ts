@@ -15,6 +15,7 @@ import { merchants } from "@/db/schema";
 import { env } from "@/env";
 import { getOrCreateDemoMerchant, ingestMessage } from "@/ingest/ingest";
 import { uploadMedia } from "@/media/s3";
+import { importNotebookPhoto } from "@/memory/import-notebook";
 import { recall } from "@/memory/recall";
 
 /**
@@ -120,6 +121,31 @@ async function handleMessage(
   if (isSelfChat && fromMe && text?.trim().endsWith("?")) {
     const result = await recall({ merchantId, question: text.trim() });
     await socket.sendMessage(chatJid, { text: result.answer });
+    return;
+  }
+
+  // Merchant console: a photo sent to yourself is a notebook page import.
+  if (isSelfChat && fromMe && content.imageMessage) {
+    const buffer = await downloadMediaMessage(message, "buffer", {});
+    const result = await importNotebookPhoto({
+      merchantId,
+      imageBase64: Buffer.from(buffer).toString("base64"),
+      mimeType: content.imageMessage.mimetype ?? "image/jpeg",
+      channel: "whatsapp",
+      chatJid,
+      senderJid: ownJid ?? "me",
+      waMessageId: message.key.id ?? undefined,
+    });
+    const committed = result.written.filter((m) => m.status === "active");
+    const pending = result.written.filter((m) => m.status === "pending");
+    const summary =
+      result.written.length === 0
+        ? "I could not read any business records from that photo."
+        : `Notebook imported: ${committed.length} fact${committed.length === 1 ? "" : "s"} saved` +
+          (pending.length > 0
+            ? `, ${pending.length} waiting for your confirmation on the dashboard.`
+            : ".");
+    await socket.sendMessage(chatJid, { text: summary });
     return;
   }
 

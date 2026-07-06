@@ -48,16 +48,21 @@ const rawFactSchema = z.object({
 });
 
 // Same leniency per fact: keep every fact that parses, shed the rest.
+function parseFactsLeniently(
+  items: unknown[],
+  limit = 20,
+): z.infer<typeof rawFactSchema>[] {
+  return items.slice(0, limit).flatMap((item) => {
+    const parsed = rawFactSchema.safeParse(item);
+    return parsed.success ? [parsed.data] : [];
+  });
+}
+
 const rawExtractionSchema = z.object({
   facts: z
     .array(z.unknown())
     .default([])
-    .transform((items) =>
-      items.slice(0, 20).flatMap((item) => {
-        const parsed = rawFactSchema.safeParse(item);
-        return parsed.success ? [parsed.data] : [];
-      }),
-    ),
+    .transform((items) => parseFactsLeniently(items)),
 });
 
 export type ExtractedFact = {
@@ -129,6 +134,17 @@ Return JSON: {"facts": [...]}. Each fact:
 A sale paid in full on the spot is "episodic", not a ledger fact — ledger "payment" is only money received against an existing balance.
 
 Today's message date is provided. Messages may mix English, Pidgin, and shorthand. Extract only what the message states — never invent amounts or names. A message with nothing worth remembering yields {"facts": []}.`;
+
+/**
+ * Parse + normalize a raw facts array from any extraction source (chat,
+ * notebook vision) through the same lenient boundary and money rules.
+ */
+export function extractedFactsFromRaw(
+  items: unknown[],
+  limit = 40,
+): ExtractedFact[] {
+  return parseFactsLeniently(items, limit).map(normalizeFact);
+}
 
 /** Extract structured facts from one message. */
 export async function extractFacts(input: {
