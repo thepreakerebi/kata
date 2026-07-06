@@ -1,14 +1,9 @@
 import { and, eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import {
-  entities,
-  entityEdges,
-  ledgerEntries,
-  memories,
-  memoryEntities,
-} from "@/db/schema";
+import { entities, entityEdges, memories, memoryEntities } from "@/db/schema";
 import { embedMany } from "@/llm/client";
 import type { ExtractedFact } from "./extract";
+import { createLedgerEntry, normalizeName } from "./ledger";
 
 /**
  * The confidence gate. Facts at or above the threshold commit as active;
@@ -16,10 +11,6 @@ import type { ExtractedFact } from "./extract";
  * a stricter gate — a wrong debt amount is worse than no memory at all.
  */
 const GATE = { default: 0.8, ledger: 0.9 } as const;
-
-function normalizeName(name: string): string {
-  return name.trim().toLowerCase().replace(/\s+/g, " ");
-}
 
 export type WrittenMemory = {
   memoryId: string;
@@ -116,55 +107,25 @@ export async function writeFacts(input: {
       //    until the fact clears the gate or the merchant confirms.
       let ledgerEntryId: string | null = null;
       if (fact.class === "ledger" && fact.ledger && passes) {
-        const counterpartyNormalized = normalizeName(fact.ledger.counterparty);
         const counterparty = resolved.find((r) => r.role === "counterparty");
-        let counterpartyEntityId = counterparty?.entityId;
-        if (!counterpartyEntityId) {
-          const [created] = await tx
-            .insert(entities)
-            .values({
-              merchantId: input.merchantId,
-              kind: "customer",
-              name: fact.ledger.counterparty.trim(),
-              normalizedName: counterpartyNormalized,
-            })
-            .onConflictDoNothing()
-            .returning({ id: entities.id });
-          counterpartyEntityId =
-            created?.id ??
-            (
-              await tx
-                .select({ id: entities.id })
-                .from(entities)
-                .where(
-                  and(
-                    eq(entities.merchantId, input.merchantId),
-                    eq(entities.kind, "customer"),
-                    eq(entities.normalizedName, counterpartyNormalized),
-                  ),
-                )
-                .limit(1)
-            )[0]!.id;
-        }
-
-        const [entry] = await tx
-          .insert(ledgerEntries)
-          .values({
-            merchantId: input.merchantId,
-            counterpartyEntityId,
-            kind: fact.ledger.kind,
-            amount: fact.ledger.amount.toFixed(2),
-            currency: fact.ledger.currency,
-            dueDate: fact.ledger.dueDate ?? null,
-            note: fact.content,
-            sourceMessageId: input.sourceMessageId,
-          })
-          .returning({ id: ledgerEntries.id });
-        ledgerEntryId = entry!.id;
+        ledgerEntryId = await createLedgerEntry(tx, {
+          merchantId: input.merchantId,
+          ledger: fact.ledger,
+          note: fact.content,
+          sourceMessageId: input.sourceMessageId,
+          counterpartyEntityId: counterparty?.entityId,
+        });
       }
 
       // 5. The memory row itself. Open-debt memories are pinned: domain-aware
       //    forgetting never touches them until the ledger entry settles.
+      //    Pending money facts keep their extracted payload in structured so
+      //    the confirmation flow can complete them.
+      const structured =
+        fact.class === "ledger" && fact.ledger && !passes
+          ? { ...(fact.structured ?? {}), _ledger: fact.ledger }
+          : (fact.structured ?? null);
+
       const [memory] = await tx
         .insert(memories)
         .values({
@@ -172,7 +133,7 @@ export async function writeFacts(input: {
           class: fact.class,
           status: passes ? "active" : "pending",
           content: fact.content,
-          structured: fact.structured ?? null,
+          structured,
           confidence: fact.confidence,
           embedding: factEmbeddings[index] ?? null,
           pinned: fact.class === "ledger" && fact.ledger?.kind === "debt",

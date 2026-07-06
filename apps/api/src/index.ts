@@ -4,7 +4,10 @@ import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { bodyLimit } from "hono/body-limit";
 import { env } from "./env";
+import { startDecayLoop } from "./memory/decay";
 import { requireAuth } from "./middleware/auth";
+import { decayRoutes } from "./routes/decay";
+import { queueRoutes } from "./routes/queue";
 import { recallRoutes } from "./routes/recall";
 import { simulatorRoutes } from "./routes/simulator";
 
@@ -34,6 +37,10 @@ app.get("/health", (c) =>
 app.use("/api/*", requireAuth);
 app.route("/api/simulator", simulatorRoutes);
 app.route("/api/recall", recallRoutes);
+app.route("/api/queue", queueRoutes);
+app.route("/api/decay", decayRoutes);
+
+startDecayLoop();
 
 export default {
   port: env.PORT,
