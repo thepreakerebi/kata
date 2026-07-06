@@ -5,7 +5,8 @@ const envSchema = z.object({
   // deployment layer. AWS credentials resolve via the standard chain.
   OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
   // Chat model must accept image input (paper-notebook OCR import).
-  OPENAI_CHAT_MODEL: z.string().min(1).default("gpt-5.1"),
+  // Mini tier: extraction calls are short and the benchmark multiplies them.
+  OPENAI_CHAT_MODEL: z.string().min(1).default("gpt-5-mini"),
   // Embeddings are truncated to 1024 dims to match the VECTOR(1024) columns.
   OPENAI_EMBED_MODEL: z.string().min(1).default("text-embedding-3-small"),
   AWS_REGION: z.string().min(1).default("eu-west-1"),
