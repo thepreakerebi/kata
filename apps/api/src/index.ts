@@ -5,6 +5,7 @@ import { secureHeaders } from "hono/secure-headers";
 import { bodyLimit } from "hono/body-limit";
 import { env } from "./env";
 import { requireAuth } from "./middleware/auth";
+import { recallRoutes } from "./routes/recall";
 import { simulatorRoutes } from "./routes/simulator";
 
 const app = new Hono();
@@ -32,6 +33,7 @@ app.get("/health", (c) =>
 
 app.use("/api/*", requireAuth);
 app.route("/api/simulator", simulatorRoutes);
+app.route("/api/recall", recallRoutes);
 
 export default {
   port: env.PORT,
