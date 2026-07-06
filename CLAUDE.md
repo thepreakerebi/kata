@@ -14,10 +14,10 @@ memory system.
 
 ## Architecture
 
-- `apps/api` — Bun + Hono. Memory engine, Bedrock pipeline, Baileys WhatsApp
-  adapter, benchmark harness. Runs as a **long-lived process** (Baileys holds a
-  persistent socket) on **Amazon ECS (Fargate)**. Never Lambda — the socket
-  must stay up.
+- `apps/api` — Bun + Hono. Memory engine, extraction pipeline, Baileys
+  WhatsApp adapter, benchmark harness. Runs as a **long-lived process**
+  (Baileys holds a persistent socket) on **Amazon EC2**. Never Lambda — the
+  socket must stay up.
 - `apps/web` — Next.js + Tailwind + shadcn/ui + motion. Dashboard: memory brain
   visualization, recall traces, confirmation queue, and the **simulator pane**
   (a chat input that feeds the exact same ingest pipeline as WhatsApp — dev
@@ -27,11 +27,11 @@ memory system.
   the entity graph, AND embeddings via CockroachDB's `VECTOR` type with
   **distributed vector indexing**. No separate vector store; the pitch is
   transactional consistency between ledger facts and their embeddings.
-- Models via **Amazon Bedrock**, always through the model-agnostic **Converse
-  API**: chat + extraction + paper-notebook photo OCR (Nova Pro — account is
-  on the AWS Free plan, which blocks Marketplace-fulfilled Anthropic models;
-  swapping to Claude after a plan upgrade is one env var), embeddings (Titan
-  Text Embeddings v2). Model IDs come from env, never hard-coded.
+- Models via the **OpenAI API** (chat + extraction + notebook-photo OCR +
+  embeddings truncated to 1024 dims). The AWS Free plan blocks **all** Bedrock
+  model invocation ("Operation not allowed" account-wide — verified
+  2026-07-06), so AWS's role is the deployment layer, not inference. Model
+  names come from env, never hard-coded.
 
 ### Required hackathon integrations (must be meaningful, not just initialized)
 
@@ -42,8 +42,8 @@ memory system.
      memory) and the Claude Code dev workflow; document both.
   3. **Agent Skills Repo** (open source) — use during schema/perf work and
      document as the optional tools-feedback item.
-- **AWS services (need ≥1):** Amazon Bedrock (models), Amazon ECS (agent
-  runtime), Amazon S3 (WhatsApp media + notebook photos).
+- **AWS services (need ≥1, meaningfully integrated):** Amazon EC2 (the
+  agent's long-lived runtime), Amazon S3 (WhatsApp media + notebook photos).
 
 ## Memory engine design (locked)
 

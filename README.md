@@ -36,7 +36,7 @@ back to its source message.
 
 ```
 WhatsApp (Baileys) ─┐
-                    ├─→ ingest → Bedrock extraction → confidence gate → memory store
+                    ├─→ ingest → LLM extraction → confidence gate → memory store
 Dashboard simulator ┘                                      │
                                                            ▼
                                           episodic · semantic · procedural · ledger
@@ -44,7 +44,7 @@ Dashboard simulator ┘                                      │
                                             with distributed vector indexing)
                                                            │
 merchant query → classifier → hybrid recall (graph + vector) → token-budgeted
-packer (visible trace) → Bedrock answer
+packer (visible trace) → grounded answer
 ```
 
 - **Memory layer: CockroachDB Cloud.** All four memory classes, the entity
@@ -52,13 +52,13 @@ packer (visible trace) → Bedrock answer
   vectors stay transactionally consistent. Semantic recall uses CockroachDB's
   **distributed vector indexing**; the agent's read-only memory introspection
   goes through the **CockroachDB Managed MCP Server**.
-- `apps/api` — Bun + Hono: memory engine, Bedrock pipeline, Baileys adapter,
-  benchmark harness. Long-lived process on **Amazon ECS (Fargate)** — Baileys
+- `apps/api` — Bun + Hono: memory engine, extraction pipeline, Baileys
+  adapter, benchmark harness. Long-lived process on **Amazon EC2** — Baileys
   holds a persistent socket, so no Lambda.
 - `apps/web` — Next.js dashboard: memory brain, recall traces, confirmation
   queue, simulator.
-- Models via **Amazon Bedrock**: chat + extraction + paper-notebook photo OCR
-  (multimodal), Titan Text Embeddings v2 for vectors. WhatsApp media lands in
+- Models via the **OpenAI API**: chat + extraction + paper-notebook photo OCR
+  (vision), embeddings at 1024 dimensions. WhatsApp media lands in
   **Amazon S3**.
 
 *(Architecture diagram, benchmark results, demo video, and deployment proof
@@ -68,7 +68,7 @@ land here as they are built.)*
 
 ```bash
 bun install
-cp .env.example .env   # fill in AWS credentials and the CockroachDB DATABASE_URL
+cp .env.example .env   # fill in OPENAI_API_KEY, AWS credentials, and the CockroachDB DATABASE_URL
 bun run dev:api        # Hono API on :8787
 bun run dev:web        # dashboard on :3000
 ```

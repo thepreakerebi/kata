@@ -1,19 +1,14 @@
 import { z } from "zod";
 
 const envSchema = z.object({
-  // AWS credentials come from the standard chain (env vars locally, task role
-  // on ECS) — only region and model IDs are validated here.
-  AWS_REGION: z.string().min(1).default("us-east-1"),
-  // Model-agnostic via the Converse API — any Bedrock chat model with image
-  // input works here (Nova Pro on free-plan accounts, Claude on paid).
-  BEDROCK_CHAT_MODEL_ID: z
-    .string()
-    .min(1)
-    .default("eu.amazon.nova-pro-v1:0"),
-  BEDROCK_EMBED_MODEL_ID: z
-    .string()
-    .min(1)
-    .default("amazon.titan-embed-text-v2:0"),
+  // Models come from the OpenAI API; AWS (EC2 runtime + S3 media) is the
+  // deployment layer. AWS credentials resolve via the standard chain.
+  OPENAI_API_KEY: z.string().min(1, "OPENAI_API_KEY is required"),
+  // Chat model must accept image input (paper-notebook OCR import).
+  OPENAI_CHAT_MODEL: z.string().min(1).default("gpt-5.1"),
+  // Embeddings are truncated to 1024 dims to match the VECTOR(1024) columns.
+  OPENAI_EMBED_MODEL: z.string().min(1).default("text-embedding-3-small"),
+  AWS_REGION: z.string().min(1).default("eu-west-1"),
   // Empty until AWS is provisioned; media code asserts presence at use time.
   S3_BUCKET: z.string().default(""),
   DATABASE_URL: z.string().min(1, "DATABASE_URL is required"),
