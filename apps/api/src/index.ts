@@ -4,6 +4,8 @@ import { logger } from "hono/logger";
 import { secureHeaders } from "hono/secure-headers";
 import { bodyLimit } from "hono/body-limit";
 import { env } from "./env";
+import { requireAuth } from "./middleware/auth";
+import { simulatorRoutes } from "./routes/simulator";
 
 const app = new Hono();
 
@@ -27,6 +29,9 @@ app.use(
 app.get("/health", (c) =>
   c.json({ status: "ok", service: "kata-api", uptime: process.uptime() }),
 );
+
+app.use("/api/*", requireAuth);
+app.route("/api/simulator", simulatorRoutes);
 
 export default {
   port: env.PORT,
